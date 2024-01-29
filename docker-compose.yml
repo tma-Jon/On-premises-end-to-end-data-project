@@ -1,0 +1,155 @@
+services:
+  #MYSQL database
+  mysql:
+    image: mysql:8.0
+    restart: on-failure
+    environment:
+      MYSQL_DATABASE: 'de_db'
+      MYSQL_USER: 'admin'
+      MYSQL_PASSWORD: '12345678'
+      MYSQL_ROOT_PASSWORD: '12345678'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - mysql-db:/var/lib/mysql
+  #MinIO object storage
+  minio:
+    image: minio/minio
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    environment:
+      MINIO_ROOT_USER: 'admin'
+      MINIO_ROOT_PASSWORD: '12345678'
+      MINIO_REGION_NAME: us-east-1
+    volumes:
+      - minio-db:/data
+    command: server --console-address ":9001" /data
+  #Spark cluster
+  spark-master:
+    image: bitnami/spark:latest
+    command: bin/spark-class org.apache.spark.deploy.master.Master
+    ports:
+      - '9090:8080'
+      - '7077:7077'
+    environment:
+      AWS_REGION: 'us-east-1'
+      AWS_ACCESS_KEY_ID: 'admin'
+      AWS_SECRET_ACCESS_KEY: '12345678'
+    volumes:
+      - ./mysql-connector-j-8.3.0.jar:/opt/bitnami/spark/jars/mysql-connector-j-8.3.0.jar
+      - ./iceberg-spark-runtime-3.5_2.12-1.4.3.jar:/opt/bitnami/spark/jars/iceberg-spark-runtime-3.5_2.12-1.4.3.jar
+      - ./nessie-spark-extensions-3.5_2.12-0.76.3.jar:/opt/bitnami/spark/jars/nessie-spark-extensions-3.5_2.12-0.76.3.jar
+      - ./spark-test.py:/opt/bitnami/spark/spark-test.py
+  spark-worker:
+    image: bitnami/spark:latest
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    depends_on:
+      - spark-master
+    environment:
+      SPARK_MODE: worker
+      SPARK_WORKER_CORES: 1
+      SPARK_WORKER_MEMORY: 1g
+      SPARK_MASTER_URL: spark://spark-master:7077
+  #Nessie catalog for Iceberg table
+  nessie:
+    image: projectnessie/nessie
+    ports:
+      - '19120:19120'
+    environment:
+      nessie.version.store.type: 'MONGODB'
+      quarkus.mongodb.database: 'nessie-catalog'
+      quarkus.mongodb.connection-string: 'mongodb://admin:12345678@mongo:27017/'
+    depends_on:
+      - mongo
+  #MongoDB backed-storage for Nessie catalog
+  mongo:
+    image: mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-config:/data/configdb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: 'admin'
+      MONGO_INITDB_ROOT_PASSWORD: '12345678'
+  mongo-express:
+    image: mongo-express
+    ports:
+      - '8082:8081'
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: 'admin'
+      ME_CONFIG_MONGODB_ADMINPASSWORD: '12345678'
+      ME_CONFIG_BASICAUTH_USERNAME: 'admin'
+      ME_CONFIG_BASICAUTH_PASSWORD: '12345678'
+      ME_CONFIG_MONGODB_SERVER: 'mongo'
+      ME_CONFIG_MONGODB_PORT: '27017'
+      ME_CONFIG_MONGODB_URL: 'mongodb://admin:12345678@mongo:27017/'
+    depends_on:
+      - mongo
+  #PostgreSQL for Airflow
+  postgres:
+    image: postgres:14.0
+    environment:
+      POSTGRES_USER: 'admin'
+      POSTGRES_PASSWORD: '12345678'
+      POSTGRES_DB: 'airflow'
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgre-db:/var/lib/postgresql/data
+  #Airflow
+  airflow-server:
+    image: airflow
+    command: webserver
+    ports:
+      - '8080:8080'
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: False
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://admin:12345678@postgres:5432/airflow
+      AIRFLOW__WEBSERVER_BASE_URL: http://localhost:8080
+      AIRFLOW__WEBSERVER__SECRET_KEY: 46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+    volumes:
+    - ./airflow/jobs:/opt/airflow/jobs
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/logs:/opt/airflow/logs
+    depends_on:
+    - postgres
+  airflow-scheduler:
+    image: airflow
+    command: bash -c "airflow db migrate && airflow users create --username admin --firstname Vi --lastname Nguyen --role Admin --email nguyentanvi.ckd@gmail.com --password 12345678 && airflow scheduler"
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: False
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://admin:12345678@postgres:5432/airflow
+      AIRFLOW__WEBSERVER_BASE_URL: http://localhost:8080
+      AIRFLOW__WEBSERVER__SECRET_KEY: 46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+    volumes:
+    - ./airflow/jobs:/opt/airflow/jobs
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/logs:/opt/airflow/logs
+    depends_on:
+    - airflow-server
+  #Dremio
+  dremio:
+    image: dremio/dremio-oss:latest
+    ports:
+      - 9047:9047
+      - 31010:31010
+      - 45678:45678
+    volumes:
+      - dremio-data:/opt/dremio/data
+    environment:
+      DREMIO_MAX_MEMORY_SIZE_MB: 4096
+      DREMIO_MAX_DIRECT_MEMORY_SIZE_MB: 4096
+      #user: admin
+      #pass: Tavi@102743
+volumes:
+  mysql-db:
+  minio-db:
+  mongodb-data:
+  mongodb-config:
+  postgre-db:
+  dremio-data:
