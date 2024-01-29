@@ -1,4 +1,17 @@
 # On-Premises Batch Data Processing build on Docker Project
+![image](https://github.com/tma-Jon/On-prem-batch-data-project/assets/105640122/be91d8e0-3aad-4419-8369-ccb09a334b1f)
+
+- MySQL as data source , localhost:3306
+- Spark as data processing, localhost:9090
+- Minio as object storage, localhost:9001
+- Iceberg as data lakehouse format table
+- Nessie as data catalog, localhost:19120
+- Mongodb as backed storage for Nessie
+- Mongodb Express as UI for Mongodb, localhost:8082
+- Airflow as orchestration tool, localhost:8080
+- PostgreSQL as backed storage for Airflow
+- Dremio as data LakeHouse query engine, localhost:9047
+
 ### 1. Docker basic learning
   - Install WSL version 2 and Docker Desktop (for Windows)
   https://docs.docker.com/desktop/install/windows-install/
