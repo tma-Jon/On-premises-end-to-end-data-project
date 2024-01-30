@@ -1,3 +1,20 @@
+#build airflow image and common config
+x-airflow-common: &airflow-common
+  build:
+    context: .
+    dockerfile: ./airflow/Dockerfile
+  image: airflow
+  environment:
+    AIRFLOW__CORE__LOAD_EXAMPLES: False
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://admin:12345678@postgres:5432/airflow
+    AIRFLOW__WEBSERVER_BASE_URL: http://localhost:8080
+    AIRFLOW__WEBSERVER__SECRET_KEY: 46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+  volumes:
+    - ./airflow/jobs:/opt/airflow/jobs
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/logs:/opt/airflow/logs
+
 services:
   #MYSQL database
   mysql:
@@ -101,35 +118,15 @@ services:
       - postgre-db:/var/lib/postgresql/data
   #Airflow
   airflow-server:
-    image: airflow
+    <<: *airflow-common
     command: webserver
     ports:
       - '8080:8080'
-    environment:
-      AIRFLOW__CORE__LOAD_EXAMPLES: False
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://admin:12345678@postgres:5432/airflow
-      AIRFLOW__WEBSERVER_BASE_URL: http://localhost:8080
-      AIRFLOW__WEBSERVER__SECRET_KEY: 46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
-    volumes:
-    - ./airflow/jobs:/opt/airflow/jobs
-    - ./airflow/dags:/opt/airflow/dags
-    - ./airflow/logs:/opt/airflow/logs
     depends_on:
     - postgres
   airflow-scheduler:
-    image: airflow
+    <<: *airflow-common
     command: bash -c "airflow db migrate && airflow users create --username admin --firstname Vi --lastname Nguyen --role Admin --email nguyentanvi.ckd@gmail.com --password 12345678 && airflow scheduler"
-    environment:
-      AIRFLOW__CORE__LOAD_EXAMPLES: False
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://admin:12345678@postgres:5432/airflow
-      AIRFLOW__WEBSERVER_BASE_URL: http://localhost:8080
-      AIRFLOW__WEBSERVER__SECRET_KEY: 46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
-    volumes:
-    - ./airflow/jobs:/opt/airflow/jobs
-    - ./airflow/dags:/opt/airflow/dags
-    - ./airflow/logs:/opt/airflow/logs
     depends_on:
     - airflow-server
   #Dremio
