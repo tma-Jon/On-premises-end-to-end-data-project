@@ -31,12 +31,8 @@ https://www.youtube.com/watch?v=Y3zqsFpUzMk&list=PLncHg6Kn2JT4kLKJ_7uy0x4AdNrCHb
 
 ### 3. Run Docker Compose
   - Git clone the source code, create new branch if you want to edit source code then create pull request later
-  - Build image for airflow first, go to airflow folder then run
-```
-docker build -t airflow
-```
-Learn more about how to build airflow docker here https://www.youtube.com/watch?v=o_pne3aLW2w&t=2866s
-  - Back to the docker compose file folder, run
+  - Learn more about how to build airflow docker here https://www.youtube.com/watch?v=o_pne3aLW2w&t=2866s
+  - In the docker compose file folder, run
 ```
 docker compose -p de-project up -d
 ```
