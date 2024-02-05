@@ -11,6 +11,8 @@
 - Airflow as orchestration tool, localhost:8080
 - PostgreSQL as backed storage for Airflow
 - Dremio as data LakeHouse query engine, localhost:9047
+- Debezium as data change capture tool, localhost:8085
+- Redpanda as Pub/Sub message (like Kafka), localhost:8084
 
 ### 1. Docker basic learning
   - Install WSL version 2 and Docker Desktop (for Windows)
@@ -66,4 +68,30 @@ docker exec de-project-spark-master-1 spark-submit --master spark://spark-master
 ### 8. Query data using Dremio
   - Go to localhost:9047 to access Dremio
   - Config Nessie catalog and Minio, follow https://www.dremio.com/blog/intro-to-dremio-nessie-and-apache-iceberg-on-your-laptop/
+
+### 9. Setup Debezium
+  - Using Postman run Post request to ```http://localhost:8083/connectors/``` with request body is
+```
+{
+"name": "mysql-connector",
+"config": {
+"connector.class": "io.debezium.connector.mysql.MySqlConnector",
+"tasks.max": "1",
+"database.hostname": "mysql",
+"database.port": "3306",
+"database.user": "root",
+"database.password": "12345678",
+"topic.prefix": "mysql-server",
+"database.server.id": "184054",
+"database.include.list": "de_db",
+"schema.history.internal.kafka.bootstrap.servers": "redpanda:9092",
+"schema.history.internal.kafka.topic": "schema-changes.de_db"
+}
+}
+```
+  - Or using cmd to run command
+```
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d "{ \"name\": \"mysql-connector\", \"config\": { \"connector.class\": \"io.debezium.connector.mysql.MySqlConnector\", \"tasks.max\": \"1\", \"database.hostname\": \"mysql\", \"database.port\": \"3306\", \"database.user\": \"root\", \"database.password\": \"12345678\", \"database.server.id\": \"184054\", \"topic.prefix\": \"mysql-server\", \"database.include.list\": \"de_db\", \"schema.history.internal.kafka.bootstrap.servers\": \"redpanda:9092\", \"schema.history.internal.kafka.topic\": \"schema-changes.de_db\" } }"
+```
+  - Check status of mysql connection by using localhost:8085 or call GET request to ```localhost:8083/connectors/mysql-connector/status```, or using cmd ```curl -H "Accept:application/json" localhost:8083/connectors/mysql-connector/status```
 
