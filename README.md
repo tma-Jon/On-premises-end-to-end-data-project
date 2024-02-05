@@ -30,6 +30,10 @@ https://www.youtube.com/watch?v=Y3zqsFpUzMk&list=PLncHg6Kn2JT4kLKJ_7uy0x4AdNrCHb
   - nessie-spark-extensions-3.5_2.12-0.76.3.jar
   - hadoop-aws-3.3.4.jar
   - aws-java-sdk-bundle-1.12.262.jar
+  - spark-sql-kafka-0-10_2.12-3.5.0
+  - spark-streaming-kafka-0-10-assembly_2.12-3.5.0
+  - kafka-clients-3.6.1
+  - commons-pool2-2.12.0
 
 ### 3. Run Docker Compose
   - Git clone the source code, create new branch if you want to edit source code then create pull request later
