@@ -11,10 +11,15 @@ nessie_warehouse = 's3a://de-1/'
 nessie_uri = 'http://nessie:19120/api/v1'
 
 #jar file
-mysql_connect_jar = 'mysql-connector-j-8.3.0.jar'
-iceberg_spark_jar = 'iceberg-spark-runtime-3.5_2.12-1.4.3.jar'
-#iceberg_aws_jar = 'iceberg-aws-bundle-1.4.2.jar'
-nessie_spark_jar = 'nessie-spark-extensions-3.5_2.12-0.76.3.jar'
+jar_list = ['mysql-connector-j-8.3.0.jar',
+            'iceberg-spark-runtime-3.5_2.12-1.4.3.jar',
+            'nessie-spark-extensions-3.5_2.12-0.76.3.jar',
+            ]
+jar_link_list = []
+for jar in jar_list:
+    jar_link = '/opt/bitnami/spark/jars/' + jar
+    jar_link_list.append(jar_link)
+jar_config = ','.join(jar_link_list)
 
 #config minio, nessie
 conf = (SparkConf()
@@ -41,11 +46,12 @@ conf = (SparkConf()
 # Create a SparkSession
 spark = (SparkSession
          .builder
-         .config('spark.jars',f'/opt/bitnami/spark/jars/{mysql_connect_jar},/opt/bitnami/spark/jars/{iceberg_spark_jar},/opt/bitnami/spark/jars/{nessie_spark_jar}')
+         .config('spark.jars',jar_config)
          .config(conf=conf)
          .appName("My App")
          .getOrCreate())
 
+#Read from mySQL
 # df = (spark.read.format('jdbc')
 #       .option('url','jdbc:mysql://mysql:3306/de_db')
 #       .option('driver','com.mysql.cj.jdbc.Driver')
@@ -61,6 +67,8 @@ spark = (SparkSession
 # spark.sql("CREATE TABLE IF NOT EXISTS nessie.iceberg_test_1.people (id int,user_id string,first_name string,last_name string,sex string,phone string,email string,date_of_birth string,job_title string) using iceberg;")
 # new_df.write.format("iceberg").mode("overwrite").save("nessie.iceberg_test_1.people")
 # new_df.write.mode("overwrite").parquet('s3a://de-1/people')
+
+#Read from Minio
 iceberg_df = spark.table('nessie.iceberg_test_1.people')
 iceberg_df.show()
 

@@ -4,7 +4,7 @@ from airflow.operators.python import PythonOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 
 dag = DAG(
-    dag_id = "sparking_flow",
+    dag_id = "sparking_streaming_flow",
     default_args = {
         "owner": "Vi Nguyen",
         "start_date": airflow.utils.dates.days_ago(1)
@@ -23,7 +23,11 @@ jar_list = ['mysql-connector-j-8.3.0.jar',
             'iceberg-spark-runtime-3.5_2.12-1.4.3.jar',
             'nessie-spark-extensions-3.5_2.12-0.76.3.jar',
             'hadoop-aws-3.3.4.jar',
-            'aws-java-sdk-bundle-1.12.262.jar'
+            'aws-java-sdk-bundle-1.12.262.jar',
+            'spark-sql-kafka-0-10_2.12-3.5.0.jar',
+            'kafka-clients-3.6.1.jar',
+            'spark-streaming-kafka-0-10-assembly_2.12-3.5.0.jar',
+            'commons-pool2-2.12.0.jar'
             ]
 jar_link_list = []
 for jar in jar_list:
@@ -34,7 +38,7 @@ jar_config = ','.join(jar_link_list)
 python_job = SparkSubmitOperator(
     task_id="python_job",
     conn_id="spark-conn",
-    application="jobs/spark-test.py",
+    application="jobs/spark-streaming-test.py",
     verbose=False,
     jars=jar_config,
     dag=dag
