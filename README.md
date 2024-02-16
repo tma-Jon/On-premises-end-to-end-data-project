@@ -1,5 +1,5 @@
 # On-Premises Batch and Stream Data Processing build on Docker Project
-![image](https://github.com/tma-Jon/On-prem-batch-data-project/assets/105640122/c2b6a7b9-c05a-4bbe-84b1-f2609705237c)
+![image](https://github.com/tma-Jon/On-prem-batch-data-project/assets/105640122/79b8e082-11ab-4bbf-95dc-bdcb07ecb4c5)
 
 - MySQL as data source , localhost:3306
 - Spark as data processing, localhost:9090
@@ -13,6 +13,7 @@
 - Dremio as data LakeHouse query engine, localhost:9047
 - Debezium as data change capture tool, localhost:8085
 - Redpanda as Pub/Sub message (like Kafka), localhost:8084
+- Streamlit as Dashboard, localhost:8501
 
 ### 1. Docker basic learning
   - Install WSL version 2 and Docker Desktop (for Windows)
