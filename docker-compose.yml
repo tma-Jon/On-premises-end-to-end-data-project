@@ -229,6 +229,18 @@ services:
       KAFKA_CONNECT_URIS: http://debezium:8083
     depends_on:
       - debezium
+  #streamlit for Dashboard
+  streamlit:
+    build:
+      context: ./streamlit
+    image: streamlit
+    volumes:
+      - ./streamlit/streamlit_app.py:/app/streamlit_app.py
+    ports:
+      - '8501:8501'
+    command: streamlit run streamlit_app.py --server.port=8501
+    depends_on:
+      - dremio
 volumes:
   mysql-db:
   minio-db:
