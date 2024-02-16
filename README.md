@@ -1,5 +1,5 @@
-# On-Premises Batch Data Processing build on Docker Project
-![image](https://github.com/tma-Jon/On-prem-batch-data-project/assets/105640122/c2b6a7b9-c05a-4bbe-84b1-f2609705237c)
+# On-Premises Batch and Stream Data Processing build on Docker Project
+![image](https://github.com/tma-Jon/On-prem-batch-data-project/assets/105640122/79b8e082-11ab-4bbf-95dc-bdcb07ecb4c5)
 
 - MySQL as data source , localhost:3306
 - Spark as data processing, localhost:9090
@@ -11,6 +11,9 @@
 - Airflow as orchestration tool, localhost:8080
 - PostgreSQL as backed storage for Airflow
 - Dremio as data LakeHouse query engine, localhost:9047
+- Debezium as data change capture tool, localhost:8085
+- Redpanda as Pub/Sub message (like Kafka), localhost:8084
+- Streamlit as Dashboard, localhost:8501
 
 ### 1. Docker basic learning
   - Install WSL version 2 and Docker Desktop (for Windows)
@@ -28,6 +31,10 @@ https://www.youtube.com/watch?v=Y3zqsFpUzMk&list=PLncHg6Kn2JT4kLKJ_7uy0x4AdNrCHb
   - nessie-spark-extensions-3.5_2.12-0.76.3.jar
   - hadoop-aws-3.3.4.jar
   - aws-java-sdk-bundle-1.12.262.jar
+  - spark-sql-kafka-0-10_2.12-3.5.0
+  - spark-streaming-kafka-0-10-assembly_2.12-3.5.0
+  - kafka-clients-3.6.1
+  - commons-pool2-2.12.0
 
 ### 3. Run Docker Compose
   - Git clone the source code, create new branch if you want to edit source code then create pull request later
@@ -66,4 +73,30 @@ docker exec de-project-spark-master-1 spark-submit --master spark://spark-master
 ### 8. Query data using Dremio
   - Go to localhost:9047 to access Dremio
   - Config Nessie catalog and Minio, follow https://www.dremio.com/blog/intro-to-dremio-nessie-and-apache-iceberg-on-your-laptop/
+
+### 9. Setup Debezium
+  - Using Postman run Post request to ```http://localhost:8083/connectors/``` with request body is
+```
+{
+"name": "mysql-connector",
+"config": {
+"connector.class": "io.debezium.connector.mysql.MySqlConnector",
+"tasks.max": "1",
+"database.hostname": "mysql",
+"database.port": "3306",
+"database.user": "root",
+"database.password": "12345678",
+"topic.prefix": "mysql-server",
+"database.server.id": "184054",
+"database.include.list": "de_db",
+"schema.history.internal.kafka.bootstrap.servers": "redpanda:9092",
+"schema.history.internal.kafka.topic": "schema-changes.de_db"
+}
+}
+```
+  - Or using cmd to run command
+```
+curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d "{ \"name\": \"mysql-connector\", \"config\": { \"connector.class\": \"io.debezium.connector.mysql.MySqlConnector\", \"tasks.max\": \"1\", \"database.hostname\": \"mysql\", \"database.port\": \"3306\", \"database.user\": \"root\", \"database.password\": \"12345678\", \"database.server.id\": \"184054\", \"topic.prefix\": \"mysql-server\", \"database.include.list\": \"de_db\", \"schema.history.internal.kafka.bootstrap.servers\": \"redpanda:9092\", \"schema.history.internal.kafka.topic\": \"schema-changes.de_db\" } }"
+```
+  - Check status of mysql connection by using localhost:8085 or call GET request to ```localhost:8083/connectors/mysql-connector/status```, or using cmd ```curl -H "Accept:application/json" localhost:8083/connectors/mysql-connector/status```
 
