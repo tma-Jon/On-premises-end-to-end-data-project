@@ -19,7 +19,7 @@ jar_list = ['mysql-connector-j-8.3.0.jar',
             ]
 jar_link_list = []
 for jar in jar_list:
-    jar_link = '/opt/bitnami/spark/jars/' + jar
+    jar_link = '/opt/airflow/jars/' + jar
     jar_link_list.append(jar_link)
 jar_config = ','.join(jar_link_list)
 
@@ -64,7 +64,9 @@ df = (spark.read.format('jdbc')
       .option('password','12345678')
       .load()
       )
+print('mySQL df')
 new_df = df.limit(5)
+new_df.show()
 
 #write to minio
 # spark.sql("CREATE NAMESPACE IF NOT EXISTS nessie.iceberg_test_1;")
@@ -75,6 +77,7 @@ new_df = df.limit(5)
 
 #Read from Minio
 iceberg_df = spark.table('nessie.iceberg_test_1.people')
+print('iceberg df')
 iceberg_df.show()
 
 spark.stop()

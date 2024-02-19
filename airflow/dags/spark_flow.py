@@ -27,7 +27,7 @@ jar_list = ['mysql-connector-j-8.3.0.jar',
             ]
 jar_link_list = []
 for jar in jar_list:
-    jar_link = '/opt/airflow/jobs/jars/' + jar
+    jar_link = '/opt/airflow/jars/' + jar
     jar_link_list.append(jar_link)
 jar_config = ','.join(jar_link_list)
 
