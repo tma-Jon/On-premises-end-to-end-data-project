@@ -25,7 +25,7 @@
   - Learn Docker basic
 https://www.youtube.com/watch?v=Y3zqsFpUzMk&list=PLncHg6Kn2JT4kLKJ_7uy0x4AdNrCHbe0n
 
-### 2. Download jars file
+### 2. Jars file (auto download when build airflow image)
   - mysql-connector-j-8.3.0.jar
   - iceberg-spark-runtime-3.5_2.12-1.4.3.jar
   - nessie-spark-extensions-3.5_2.12-0.76.3.jar
@@ -64,7 +64,6 @@ docker exec de-project-spark-master-1 spark-submit --master spark://spark-master
 #### Note: edit spark-test.py before run
 
 ### 7. Submit spark job using airflow
-  - Copy jars file to folder airflow/jobs/jars
   - Input Minio access key and secret key in airflow/jobs/spark-test.py
   - Go to localhost:8080, in the DAGs, choose the job and start
   - Learn more here https://www.youtube.com/watch?v=waM3Z6ofj9c&t=464s
