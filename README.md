@@ -1,5 +1,5 @@
 # On-Premises Batch and Stream Data Processing build on Docker Project
-![image](https://github.com/tma-Jon/On-prem-batch-data-project/assets/105640122/79b8e082-11ab-4bbf-95dc-bdcb07ecb4c5)
+![image](https://github.com/tma-Jon/On-premises-end-to-end-data-project/assets/105640122/7538e543-54b1-4645-995b-eb5449477bb8)
 
 - MySQL as data source , localhost:3306
 - Spark as data processing, localhost:9090
